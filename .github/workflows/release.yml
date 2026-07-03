@@ -9,8 +9,15 @@ name: Release
 # The CHANGELOG must already contain a "## [X.Y.Z] - <date>" section for the
 # version being released.
 #
+# Publishing uses NuGet Trusted Publishing (OIDC) instead of a long-lived API
+# key: on nuget.org, under your account > Trusted Publishing, add a policy with
+# Repository Owner "ipregistry", Repository "ipregistry-dotnet", and Workflow
+# File "release.yml". The workflow then exchanges a GitHub OIDC token for a
+# short-lived (1 hour) API key at publish time.
+#
 # Required secrets:
-#   NUGET_API_KEY      an API key allowed to push the Ipregistry package
+#   NUGET_USER         the nuget.org profile name owning the Trusted Publishing
+#                      policy (a username, not an email address)
 #   IPREGISTRY_API_KEY a valid Ipregistry API key for the system-test gate
 on:
   workflow_dispatch:
@@ -22,6 +29,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write # OIDC token issuance for NuGet Trusted Publishing
 
 concurrency:
   group: release
@@ -107,15 +115,17 @@ jobs:
           dotnet pack src/Ipregistry --configuration Release --no-build
           -p:Version="$VERSION" --output artifacts
 
+      - name: NuGet login (OIDC -> temp API key)
+        uses: NuGet/login@v1
+        id: nuget-login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
       - name: Push to NuGet
         env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
         run: |
           set -euo pipefail
-          if [ -z "${NUGET_API_KEY:-}" ]; then
-            echo "::error::NUGET_API_KEY secret is required to publish the package."
-            exit 1
-          fi
           dotnet nuget push "artifacts/Ipregistry.$VERSION.nupkg" \
             --api-key "$NUGET_API_KEY" \
             --source https://api.nuget.org/v3/index.json \
