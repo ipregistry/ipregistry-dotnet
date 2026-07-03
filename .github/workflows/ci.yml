@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Restore
+        run: dotnet restore Ipregistry.slnx
+
+      - name: Verify formatting
+        run: dotnet format Ipregistry.slnx --verify-no-changes --no-restore
+
+      - name: Build
+        run: dotnet build Ipregistry.slnx --configuration Release --no-restore
+
+      - name: Test (unit, net8.0 and net10.0)
+        run: >
+          dotnet test tests/Ipregistry.Tests --configuration Release --no-build
+          --collect:"XPlat Code Coverage" --results-directory TestResults
+
+      - name: Pack
+        run: dotnet pack src/Ipregistry --configuration Release --no-build --output artifacts
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: nuget-package
+          path: artifacts/*.*nupkg

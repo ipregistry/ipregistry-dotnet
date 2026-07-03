@@ -1,0 +1,36 @@
+name: System Tests
+
+# System tests exercise the live Ipregistry API and consume credits, so they do
+# not run on every push. They run on demand and on a weekly schedule.
+#
+# Requires a repository secret named IPREGISTRY_API_KEY. When it is absent (for
+# example on a fork), the tests skip cleanly and the job still succeeds.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1' # every Monday at 06:00 UTC
+
+permissions:
+  contents: read
+
+concurrency:
+  group: system-tests
+  cancel-in-progress: false
+
+jobs:
+  system-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Run system tests
+        env:
+          IPREGISTRY_API_KEY: ${{ secrets.IPREGISTRY_API_KEY }}
+        run: dotnet test tests/Ipregistry.SystemTests --configuration Release --logger "console;verbosity=detailed"

@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Ipregistry/Ipregistry.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Ipregistry.Tests/Ipregistry.Tests.csproj" />
+    <Project Path="tests/Ipregistry.SystemTests/Ipregistry.SystemTests.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/csharp/Ipregistry.Samples.CSharp.csproj" />
+    <Project Path="samples/fsharp/Ipregistry.Samples.FSharp.fsproj" />
+  </Folder>
+</Solution>

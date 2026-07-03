@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <RootNamespace>Ipregistry</RootNamespace>
+    <AssemblyName>Ipregistry</AssemblyName>
+    <IsAotCompatible>true</IsAotCompatible>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>Ipregistry</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Ipregistry</Authors>
+    <Company>Ipregistry</Company>
+    <Description>Official .NET client library for the Ipregistry IP geolocation and threat data API. Look up a single IP address, the requester's own IP, or thousands in batch, and parse User-Agent strings. Async, cancellable, retrying, cacheable, DI-ready, and AOT/trimming compatible.</Description>
+    <PackageTags>ipregistry;ip;geolocation;geoip;ip-address;threat;security;vpn;proxy;asn;user-agent</PackageTags>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://ipregistry.co</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ipregistry/ipregistry-dotnet</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Http" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Ipregistry.Tests" />
+  </ItemGroup>
+
+</Project>
