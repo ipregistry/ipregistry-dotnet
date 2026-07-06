@@ -7,7 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.0.0] - 2026-07-03
+## [2.0.0] - 2026-07-04
+
+Versioning starts at 2.0.0 because the NuGet package ID previously hosted an
+unofficial community wrapper whose 1.0.x version numbers cannot be reused.
 
 ### Added
 
@@ -30,5 +33,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multi-targeting for .NET 8 and .NET 10, nullable annotations, and
   trimming/Native AOT compatibility via source-generated JSON.
 
-[Unreleased]: https://github.com/ipregistry/ipregistry-dotnet/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/ipregistry/ipregistry-dotnet/releases/tag/v1.0.0
+[Unreleased]: https://github.com/ipregistry/ipregistry-dotnet/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/ipregistry/ipregistry-dotnet/releases/tag/v2.0.0

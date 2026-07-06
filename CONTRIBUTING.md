@@ -42,5 +42,5 @@ dotnet format Ipregistry.slnx
 
 Publishing uses [NuGet Trusted Publishing](https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing)
 rather than a long-lived API key. One-time setup: on nuget.org, under **Trusted Publishing**, add a policy with
-repository owner `ipregistry`, repository `ipregistry-dotnet`, and workflow file `release.yml`, then set the
+repository owner `ipregistry`, repository `ipregistry-dotnet`, and workflow file `release.yaml`, then set the
 `NUGET_USER` repository secret to the nuget.org profile name owning that policy.

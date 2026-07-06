@@ -10,7 +10,7 @@
 
   <PropertyGroup>
     <PackageId>Ipregistry</PackageId>
-    <Version>1.0.0</Version>
+    <Version>2.0.0</Version>
     <Authors>Ipregistry</Authors>
     <Company>Ipregistry</Company>
     <Description>Official .NET client library for the Ipregistry IP geolocation and threat data API. Look up a single IP address, the requester's own IP, or thousands in batch, and parse User-Agent strings. Async, cancellable, retrying, cacheable, DI-ready, and AOT/trimming compatible.</Description>
