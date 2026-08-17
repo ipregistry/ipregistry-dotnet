@@ -23,7 +23,7 @@ public sealed class IpregistryClientTests
         {
           "ip": "8.8.8.8",
           "type": "IPv4",
-          "connection": { "asn": 15169, "organization": "Google LLC", "type": "hosting" },
+          "connection": { "asn": 15169, "is_anycast": true, "organization": "Google LLC", "type": "hosting" },
           "location": {
             "continent": { "code": "NA", "name": "North America" },
             "country": { "code": "US", "name": "United States", "area": 9629091, "population": 331002651 },
@@ -71,6 +71,7 @@ public sealed class IpregistryClientTests
         Assert.Equal("8.8.8.8", info.Ip);
         Assert.Equal(IpType.IPv4, info.Type);
         Assert.Equal(15169, info.Connection.Asn);
+        Assert.True(info.Connection.IsAnycast);
         Assert.Equal("US", info.Location.Country.Code);
         Assert.Equal("Mountain View", info.Location.City);
         Assert.Equal(37.405992, info.Location.Latitude);

@@ -181,6 +181,10 @@ public sealed record Connection
     [JsonPropertyName("domain")]
     public string? Domain { get; set; }
 
+    /// <summary>Whether the IP address is announced via anycast, i.e. simultaneously from multiple locations.</summary>
+    [JsonPropertyName("is_anycast")]
+    public bool IsAnycast { get; set; }
+
     /// <summary>The organization operating the network.</summary>
     [JsonPropertyName("organization")]
     public string? Organization { get; set; }

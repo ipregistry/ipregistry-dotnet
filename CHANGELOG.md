@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- New property `Connection.IsAnycast` (JSON `connection.is_anycast`): whether the IP address is announced via
+  anycast, i.e. simultaneously from multiple locations.
+
 ## [2.0.0] - 2026-07-04
 
 Versioning starts at 2.0.0 because the NuGet package ID previously hosted an
