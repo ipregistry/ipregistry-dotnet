@@ -66,7 +66,7 @@ public sealed class IpregistryClientTests
         var (client, handler) = CreateClient();
         handler.Enqueue(HttpStatusCode.OK, SampleIpInfoJson);
 
-        var info = await client.LookupAsync("8.8.8.8");
+        var info = await client.LookupAsync("8.8.8.8", cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal("8.8.8.8", info.Ip);
         Assert.Equal(IpType.IPv4, info.Type);
@@ -96,7 +96,7 @@ public sealed class IpregistryClientTests
     public async Task Lookup_RejectsEmptyIp(string? ip)
     {
         var (client, _) = CreateClient();
-        await Assert.ThrowsAsync<ArgumentException>(() => client.LookupAsync(ip!));
+        await Assert.ThrowsAsync<ArgumentException>(() => client.LookupAsync(ip!, cancellationToken: TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -105,7 +105,7 @@ public sealed class IpregistryClientTests
         var (client, handler) = CreateClient();
         handler.Enqueue(HttpStatusCode.OK, """{"ip": "2001:db8::1", "type": "IPv6"}""");
 
-        var info = await client.LookupAsync(IPAddress.Parse("2001:db8::1"));
+        var info = await client.LookupAsync(IPAddress.Parse("2001:db8::1"), cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal("2001:db8::1", info.Ip);
         Assert.Contains("2001", handler.Requests[0].Uri!.AbsolutePath, StringComparison.Ordinal);
@@ -119,7 +119,7 @@ public sealed class IpregistryClientTests
 
         var options = new LookupOptions { Fields = "location.country.name,security", Hostname = true };
         options.AdditionalParameters["key2"] = "value 2";
-        await client.LookupAsync("8.8.8.8", options);
+        await client.LookupAsync("8.8.8.8", options, cancellationToken: TestContext.Current.CancellationToken);
 
         var query = handler.Requests[0].Uri!.Query;
         Assert.Contains("fields=location.country.name%2Csecurity", query, StringComparison.Ordinal);
@@ -135,7 +135,7 @@ public sealed class IpregistryClientTests
             {"code": "INVALID_IP_ADDRESS", "message": "The IP is invalid.", "resolution": "Use a valid IP."}
             """);
 
-        var exception = await Assert.ThrowsAsync<IpregistryApiException>(() => client.LookupAsync("invalid"));
+        var exception = await Assert.ThrowsAsync<IpregistryApiException>(() => client.LookupAsync("invalid", cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal("INVALID_IP_ADDRESS", exception.Code);
         Assert.Equal(IpregistryErrorCode.InvalidIpAddress, exception.ErrorCode);
@@ -150,7 +150,7 @@ public sealed class IpregistryClientTests
         var (client, handler) = CreateClient(options => options.RetryOnServerError = false);
         handler.Enqueue(HttpStatusCode.BadGateway, "<html>bad gateway</html>");
 
-        var exception = await Assert.ThrowsAsync<IpregistryApiException>(() => client.LookupAsync("8.8.8.8"));
+        var exception = await Assert.ThrowsAsync<IpregistryApiException>(() => client.LookupAsync("8.8.8.8", cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Null(exception.Code);
         Assert.Equal(IpregistryErrorCode.Unknown, exception.ErrorCode);
@@ -166,7 +166,7 @@ public sealed class IpregistryClientTests
             .Enqueue(HttpStatusCode.ServiceUnavailable, "oops")
             .Enqueue(HttpStatusCode.OK, SampleIpInfoJson);
 
-        var info = await client.LookupAsync("8.8.8.8");
+        var info = await client.LookupAsync("8.8.8.8", cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal("8.8.8.8", info.Ip);
         Assert.Equal(3, handler.Requests.Count);
@@ -178,7 +178,7 @@ public sealed class IpregistryClientTests
         var (client, handler) = CreateClient(options => options.RetryOnServerError = false);
         handler.Enqueue(HttpStatusCode.InternalServerError, """{"code": "INTERNAL", "message": "boom"}""");
 
-        await Assert.ThrowsAsync<IpregistryApiException>(() => client.LookupAsync("8.8.8.8"));
+        await Assert.ThrowsAsync<IpregistryApiException>(() => client.LookupAsync("8.8.8.8", cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Single(handler.Requests);
     }
@@ -189,7 +189,7 @@ public sealed class IpregistryClientTests
         var (client, handler) = CreateClient(options => options.MaxRetries = 2);
         handler.Enqueue(HttpStatusCode.InternalServerError, """{"code": "INTERNAL", "message": "boom"}""");
 
-        var exception = await Assert.ThrowsAsync<IpregistryApiException>(() => client.LookupAsync("8.8.8.8"));
+        var exception = await Assert.ThrowsAsync<IpregistryApiException>(() => client.LookupAsync("8.8.8.8", cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(IpregistryErrorCode.Internal, exception.ErrorCode);
         Assert.Equal(3, handler.Requests.Count); // initial attempt + 2 retries
@@ -201,7 +201,7 @@ public sealed class IpregistryClientTests
         var (client, handler) = CreateClient();
         handler.Enqueue(HttpStatusCode.TooManyRequests, """{"code": "TOO_MANY_REQUESTS", "message": "slow down"}""");
 
-        var exception = await Assert.ThrowsAsync<IpregistryApiException>(() => client.LookupAsync("8.8.8.8"));
+        var exception = await Assert.ThrowsAsync<IpregistryApiException>(() => client.LookupAsync("8.8.8.8", cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(IpregistryErrorCode.TooManyRequests, exception.ErrorCode);
         Assert.Single(handler.Requests);
@@ -215,7 +215,7 @@ public sealed class IpregistryClientTests
             .Enqueue(HttpStatusCode.TooManyRequests, "{}", ("Retry-After", "0"))
             .Enqueue(HttpStatusCode.OK, SampleIpInfoJson);
 
-        var info = await client.LookupAsync("8.8.8.8");
+        var info = await client.LookupAsync("8.8.8.8", cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal("8.8.8.8", info.Ip);
         Assert.Equal(2, handler.Requests.Count);
@@ -229,7 +229,7 @@ public sealed class IpregistryClientTests
             .EnqueueTransportError(new HttpRequestException("connection reset"))
             .Enqueue(HttpStatusCode.OK, SampleIpInfoJson);
 
-        var info = await client.LookupAsync("8.8.8.8");
+        var info = await client.LookupAsync("8.8.8.8", cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal("8.8.8.8", info.Ip);
         Assert.Equal(2, handler.Requests.Count);
@@ -241,7 +241,7 @@ public sealed class IpregistryClientTests
         var (client, handler) = CreateClient(options => options.MaxRetries = 1);
         handler.EnqueueTransportError(new HttpRequestException("connection reset"));
 
-        var exception = await Assert.ThrowsAsync<IpregistryClientException>(() => client.LookupAsync("8.8.8.8"));
+        var exception = await Assert.ThrowsAsync<IpregistryClientException>(() => client.LookupAsync("8.8.8.8", cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.IsType<HttpRequestException>(exception.InnerException);
         Assert.Equal(2, handler.Requests.Count);
@@ -264,7 +264,7 @@ public sealed class IpregistryClientTests
         var (client, handler) = CreateClient();
         handler.Enqueue(HttpStatusCode.OK, "{not json");
 
-        await Assert.ThrowsAsync<IpregistryClientException>(() => client.LookupAsync("8.8.8.8"));
+        await Assert.ThrowsAsync<IpregistryClientException>(() => client.LookupAsync("8.8.8.8", cancellationToken: TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -273,8 +273,8 @@ public sealed class IpregistryClientTests
         var (client, handler) = CreateClient(options => options.Cache = new InMemoryIpregistryCache());
         handler.Enqueue(HttpStatusCode.OK, SampleIpInfoJson);
 
-        var first = await client.LookupAsync("8.8.8.8");
-        var second = await client.LookupAsync("8.8.8.8");
+        var first = await client.LookupAsync("8.8.8.8", cancellationToken: TestContext.Current.CancellationToken);
+        var second = await client.LookupAsync("8.8.8.8", cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Same(first, second);
         Assert.Single(handler.Requests);
@@ -288,8 +288,8 @@ public sealed class IpregistryClientTests
             .Enqueue(HttpStatusCode.OK, SampleIpInfoJson)
             .Enqueue(HttpStatusCode.OK, SampleIpInfoJson);
 
-        await client.LookupAsync("8.8.8.8");
-        await client.LookupAsync("8.8.8.8", new LookupOptions { Fields = "security" });
+        await client.LookupAsync("8.8.8.8", cancellationToken: TestContext.Current.CancellationToken);
+        await client.LookupAsync("8.8.8.8", new LookupOptions { Fields = "security" }, cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(2, handler.Requests.Count);
     }
@@ -306,7 +306,7 @@ public sealed class IpregistryClientTests
             }
             """);
 
-        var origin = await client.LookupOriginAsync();
+        var origin = await client.LookupOriginAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal("203.0.113.10", origin.Ip);
         Assert.NotNull(origin.UserAgent);
@@ -329,7 +329,7 @@ public sealed class IpregistryClientTests
             }
             """);
 
-        var results = await client.LookupBatchAsync(["8.8.8.8", "not-an-ip", "1.1.1.1"]);
+        var results = await client.LookupBatchAsync(["8.8.8.8", "not-an-ip", "1.1.1.1"], cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(3, results.Count);
         Assert.True(results[0].IsSuccess);
@@ -353,9 +353,9 @@ public sealed class IpregistryClientTests
             .Enqueue(HttpStatusCode.OK, SampleIpInfoJson)
             .Enqueue(HttpStatusCode.OK, """{"results": [{"ip": "1.1.1.1", "type": "IPv4"}]}""");
 
-        await client.LookupAsync("8.8.8.8"); // populates the cache
+        await client.LookupAsync("8.8.8.8", cancellationToken: TestContext.Current.CancellationToken); // populates the cache
 
-        var results = await client.LookupBatchAsync(["8.8.8.8", "1.1.1.1"]);
+        var results = await client.LookupBatchAsync(["8.8.8.8", "1.1.1.1"], cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(2, handler.Requests.Count);
         Assert.Equal("""["1.1.1.1"]""", handler.Requests[1].Body); // only the miss is requested
@@ -363,7 +363,7 @@ public sealed class IpregistryClientTests
         Assert.Equal("1.1.1.1", results[1].Value.Ip);
 
         // The batch response populated the cache for the second address.
-        var again = await client.LookupAsync("1.1.1.1");
+        var again = await client.LookupAsync("1.1.1.1", cancellationToken: TestContext.Current.CancellationToken);
         Assert.Equal("1.1.1.1", again.Ip);
         Assert.Equal(2, handler.Requests.Count);
     }
@@ -389,7 +389,7 @@ public sealed class IpregistryClientTests
         });
 
         string[] ips = ["10.0.0.1", "10.0.0.2", "10.0.0.3", "10.0.0.4", "10.0.0.5"];
-        var results = await client.LookupBatchAsync(ips);
+        var results = await client.LookupBatchAsync(ips, cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(3, handler.Requests.Count); // 2 + 2 + 1
         Assert.Equal(ips, results.Select(result => result.Value.Ip));
@@ -409,7 +409,7 @@ public sealed class IpregistryClientTests
             .Enqueue(HttpStatusCode.Forbidden, """{"code": "INVALID_API_KEY", "message": "bad key"}""");
 
         var exception = await Assert.ThrowsAsync<IpregistryApiException>(
-            () => client.LookupBatchAsync(["10.0.0.1", "10.0.0.2"]));
+            () => client.LookupBatchAsync(["10.0.0.1", "10.0.0.2"], cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(IpregistryErrorCode.InvalidApiKey, exception.ErrorCode);
     }
@@ -420,7 +420,7 @@ public sealed class IpregistryClientTests
         var (client, handler) = CreateClient();
         handler.Enqueue(HttpStatusCode.OK, """{"results": [{"ip": "8.8.8.8"}]}""");
 
-        var results = await client.LookupBatchAsync([IPAddress.Parse("8.8.8.8")]);
+        var results = await client.LookupBatchAsync([IPAddress.Parse("8.8.8.8")], cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Single(results);
         Assert.Equal("""["8.8.8.8"]""", handler.Requests[0].Body);
@@ -460,7 +460,7 @@ public sealed class IpregistryClientTests
         var (client, handler) = CreateClient(options => options.BaseUrl = "https://example.test/api/");
         handler.Enqueue(HttpStatusCode.OK, "{}");
 
-        await client.LookupAsync("8.8.8.8");
+        await client.LookupAsync("8.8.8.8", cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal("https://example.test/api/8.8.8.8", handler.Requests[0].Uri!.ToString());
     }
@@ -471,7 +471,7 @@ public sealed class IpregistryClientTests
         var (client, handler) = CreateClient(options => options.UserAgent = "MyApp/2.0");
         handler.Enqueue(HttpStatusCode.OK, "{}");
 
-        await client.LookupAsync("8.8.8.8");
+        await client.LookupAsync("8.8.8.8", cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal("MyApp/2.0", handler.Requests[0].UserAgent);
     }

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace Ipregistry.SystemTests;
@@ -23,7 +24,10 @@ namespace Ipregistry.SystemTests;
 /// </summary>
 public sealed class SystemTestFactAttribute : FactAttribute
 {
-    public SystemTestFactAttribute()
+    public SystemTestFactAttribute(
+        [CallerFilePath] string? sourceFilePath = null,
+        [CallerLineNumber] int sourceLineNumber = -1)
+        : base(sourceFilePath, sourceLineNumber)
     {
         if (string.IsNullOrEmpty(SystemTests.ApiKey))
         {
