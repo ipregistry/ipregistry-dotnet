@@ -33,7 +33,7 @@ public sealed class IpregistryClientTests
             "longitude": -122.078515,
             "in_eu": false
           },
-          "security": { "is_vpn": false, "is_threat": false },
+          "security": { "is_residential_proxy": true, "is_vpn": false, "is_threat": false },
           "time_zone": { "id": "America/Los_Angeles", "offset": -28800 }
         }
         """;
@@ -76,6 +76,7 @@ public sealed class IpregistryClientTests
         Assert.Equal("Mountain View", info.Location.City);
         Assert.Equal(37.405992, info.Location.Latitude);
         Assert.Equal(-28800, info.TimeZone.Offset);
+        Assert.True(info.Security.IsResidentialProxy);
         Assert.False(info.Security.IsVpn);
         // Omitted nested objects are non-null with default values.
         Assert.NotNull(info.Carrier);

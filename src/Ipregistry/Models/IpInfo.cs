@@ -296,6 +296,10 @@ public sealed record Security
     [JsonPropertyName("is_relay")]
     public bool IsRelay { get; set; }
 
+    /// <summary>Whether the IP address is a node of a residential proxy network.</summary>
+    [JsonPropertyName("is_residential_proxy")]
+    public bool IsResidentialProxy { get; set; }
+
     /// <summary>Whether the IP address is a Tor node.</summary>
     [JsonPropertyName("is_tor")]
     public bool IsTor { get; set; }
