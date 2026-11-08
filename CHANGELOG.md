@@ -7,12 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-11-08
+
 ### Added
 
 - New property `Connection.IsAnycast` (JSON `connection.is_anycast`): whether the IP address is announced via
   anycast, i.e. simultaneously from multiple locations.
 - New property `Security.IsResidentialProxy` (JSON `security.is_residential_proxy`): whether the IP address is a
   node of a residential proxy network.
+
+### Changed
+
+- Microsoft.Extensions.Http, .Options and .DependencyInjection 10.0.14 on .NET 10.
 
 ## [2.0.0] - 2026-07-04
 
